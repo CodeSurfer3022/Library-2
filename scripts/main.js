@@ -24,6 +24,7 @@ function ReadStatus() {
     book.Read = read;
     Read.textContent = `Read: ${read}`;
     console.log(myLibrary);
+    updateLibrary();
 }
 
 function deleteCard() {
@@ -34,6 +35,7 @@ function deleteCard() {
     let index = myLibrary.findIndex(book => book.Title === Title);
     console.log(myLibrary, book, index);
     myLibrary.splice(index, 1);
+    updateLibrary();
     main.removeChild(card);
 }
 
@@ -135,6 +137,7 @@ function editBookInLibrary(card, book) {
     book.Pages = details.Pages;
     book.Read = details.Read;
     console.log(book, details);
+    updateLibrary();
 
     updateCard(card, book);
 }
@@ -145,8 +148,10 @@ function addBookToLibrary() {
 
     let book = new Book(details.Title, details.Author, details.Pages, details.Read);
     myLibrary.push(book);
+    updateLibrary();
 
     updateCard(card, book);
+    addNewCard();
 }
 
 function  addRadioInputSection(book, property) {
@@ -266,14 +271,15 @@ function bringUpForm() {
     addForm(card, book);
 }
 
+function updateLibrary() {
+    localStorage.setItem('library', JSON.stringify(myLibrary));
+}
+
 // function renderBooksFromLibrary(){
-//     console.log('in render books from library');
-//     console.log(myLibrary);
 //     for(let book of myLibrary) {
 //         console.log(book);
-//         makeCard(book);
+//         addBookToLibrary(book);
 //     }
-//     addNewCard();
 // }
 
 function addEventListeners() {
@@ -283,6 +289,11 @@ function addEventListeners() {
 
 // main starts here
 const main = document.querySelector('main');
+
+// If there was a reload, localStorage might have some books
+// 1. Check and render them on reload
+// 2. We need to update localStorage whenever myLibrary is updated
+
 // if(localStorage.getItem('library')) {
 //     let library = JSON.parse(localStorage.getItem('library'));
 //     for (let book of library) {
@@ -295,8 +306,6 @@ const main = document.querySelector('main');
 //         myLibrary.push(newBook);
 //     }
 //     console.log(myLibrary);
-    // renderBooksFromLibrary();
+//     renderBooksFromLibrary();
 // }
-
-addNewCard();
 addEventListeners();
