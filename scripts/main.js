@@ -11,15 +11,20 @@ function Book(Title, Author, Pages, Read) {
 }
 
 function ReadStatus() {
-    let currentCard = this.parentNode.parentNode;
-    let Read = currentCard.querySelector(`p[value="Read"]`);
+    let card = this.parentNode.parentNode;
+    let Title = card.querySelector('p[value="Title"]').textContent;
+    let book = retrieveBookFromLibrary(Title)[0];
+    console.log(book);
+    let Read = card.querySelector(`p[value="Read"]`);
     let read = Read.textContent;
     if(read.includes('Yes')) {
         read = "No";
     } else {
         read = "Yes";
     }
+    book.Read = read;
     Read.textContent = `Read: ${read}`;
+    console.log(myLibrary);
 }
 
 function deleteCard() {
