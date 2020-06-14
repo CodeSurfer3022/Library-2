@@ -236,9 +236,7 @@ function addForm(card, book) {
     if(!retrieveBookFromLibrary(book.Title).length) {
         save.addEventListener('click', addBookToLibrary);
     } else {
-        save.addEventListener('click', function () {
-            editBookInLibrary(card, book);
-        });
+        save.addEventListener('click', editBookInLibrary.bind(this, card, book));
     }
 }
 
