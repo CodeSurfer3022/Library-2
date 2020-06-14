@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let myLibrary = [];
 let bookProperties = ['Title', 'Author', 'Pages', 'Read'];
-let edit;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function Book(Title, Author, Pages, Read) {
     this.Title = Title;
@@ -95,17 +94,7 @@ function addNewCard() {
     addEventListeners();
 }
 
-function makeCard(book) {
-    console.log(book);
-    let card;
-    if (edit) {
-        card = this.parentNode.parentNode;
-        console.log(card);
-    } else {
-        card = document.createElement('div');
-        card.setAttribute('class', 'card');
-    }
-
+function updateCard(card, book) {
     const infoCard = document.createElement('div');
     infoCard.setAttribute('class', 'infoCard');
 
@@ -116,30 +105,17 @@ function makeCard(book) {
     const details = document.createElement('div');
     details.setAttribute('value', 'details');
     renderDetails(details, book);
-    console.log(details);
     infoCard.appendChild(details);
 
     const options = document.createElement('div');
     addOptions(options);
     infoCard.appendChild(options);
-    console.log(infoCard);
+
+    card.removeChild(card.firstElementChild);
     card.appendChild(infoCard);
-    console.log(card);
-    main.appendChild(card);
 }
 
-function renderBooksFromLibrary(){
-    console.log('in render books from library');
-    console.log(myLibrary);
-    for(let book of myLibrary) {
-        console.log(book);
-        makeCard(book);
-    }
-    addNewCard();
-}
-
-function addBookToLibrary() {
-    console.log('in add book to library');
+function getFormDetails() {
     let Title = document.bookInfo.Title.value;
     let Author = document.bookInfo.Author.value;
     let Pages = document.bookInfo.Pages.value;
@@ -148,19 +124,29 @@ function addBookToLibrary() {
     let selectedButton = readButtons.filter( readButton => readButton.checked)[0];
     let Read = selectedButton.value;
 
-    let book = new Book(Title, Author, Pages, Read);
-    myLibrary.push(book);
-    console.log(myLibrary);
-    localStorage.setItem('library', JSON.stringify(myLibrary));
-    if (edit) {
+    return {Title, Author, Pages, Read};
+}
 
-    } else {
-        // remove last child from main which is the form
-        main.removeChild(main.lastElementChild);
-    }
-    makeCard(book);
-    // add the new book to main
-    addNewCard();
+function editBookInLibrary(card, book) {
+    let details = getFormDetails();
+
+    book.Title = details.Title;
+    book.Author = details.Author;
+    book.Pages = details.Pages;
+    book.Read = details.Read;
+    console.log(book, details);
+
+    updateCard(card, book);
+}
+
+function addBookToLibrary() {
+    const card = this.parentNode.parentNode;
+    let details = getFormDetails();
+
+    let book = new Book(details.Title, details.Author, details.Pages, details.Read);
+    myLibrary.push(book);
+
+    updateCard(card, book);
 }
 
 function  addRadioInputSection(book, property) {
@@ -237,39 +223,58 @@ function addInputFields(form, book, property) {
     form.appendChild(section);
 }
 
-function addForm(card, currentBook) {
+function addForm(card, book) {
     const form = document.createElement('form');
     form.setAttribute('name','bookInfo');
-    bookProperties.forEach(property => addInputFields(form, currentBook ,property));
+    bookProperties.forEach(property => addInputFields(form, book ,property));
     card.appendChild(form);
 
     const save = document.createElement('input');
     save.type = 'button';
     save.value = 'Save';
     form.appendChild(save);
-    save.addEventListener('click', addBookToLibrary);
+
+    if(!retrieveBookFromLibrary(book.Title).length) {
+        console.log(book);
+        save.addEventListener('click', addBookToLibrary);
+    } else {
+        save.addEventListener('click', function () {
+            editBookInLibrary(card, book);
+        });
+    }
+}
+
+function retrieveBookFromLibrary(Title) {
+    // retrieve book with Title
+    return myLibrary.filter(book => book.Title === Title);
 }
 
 function bringUpForm() {
     let caller = this.value;
     let card;
-    let currentBook = '';
-    edit = caller === 'edit';
-    if(edit) {
+    let book;
+    if(caller === 'edit') {
         card = this.parentNode.parentNode.parentNode;
-        let infoCard = this.parentNode.parentNode;
-        let details = infoCard.querySelector('div[value="details"]');
-        let Title = details.querySelector('p[value="Title"]');
+        let Title = card.querySelector('p[value="Title"]').textContent;
         // retrieve book with Title
-        currentBook = myLibrary.filter(book => book.Title === Title.textContent)[0];
+        book = retrieveBookFromLibrary(Title)[0];
     } else {
         card = this.parentNode;
-        currentBook = new Book('', '', '', '');
+        book = new Book('', '', '', '');
     }
-
     card.removeChild(card.lastElementChild);
-    addForm(card, currentBook);
+    addForm(card, book);
 }
+
+// function renderBooksFromLibrary(){
+//     console.log('in render books from library');
+//     console.log(myLibrary);
+//     for(let book of myLibrary) {
+//         console.log(book);
+//         makeCard(book);
+//     }
+//     addNewCard();
+// }
 
 function addEventListeners() {
     const plus = document.querySelector('button[value="+"]');
@@ -278,20 +283,20 @@ function addEventListeners() {
 
 // main starts here
 const main = document.querySelector('main');
-if(localStorage.getItem('library')) {
-    let library = JSON.parse(localStorage.getItem('library'));
-    for (let book of library) {
-        let keys = Object.keys(book);
-        let title = book[keys[0]];
-        let author = book[keys[1]];
-        let pages = book[keys[2]];
-        let read = book[keys[3]];
-        let newBook = new Book(title, author, pages, read);
-        myLibrary.push(newBook);
-    }
-    console.log(myLibrary);
-    renderBooksFromLibrary();
-}
+// if(localStorage.getItem('library')) {
+//     let library = JSON.parse(localStorage.getItem('library'));
+//     for (let book of library) {
+//         let keys = Object.keys(book);
+//         let title = book[keys[0]];
+//         let author = book[keys[1]];
+//         let pages = book[keys[2]];
+//         let read = book[keys[3]];
+//         let newBook = new Book(title, author, pages, read);
+//         myLibrary.push(newBook);
+//     }
+//     console.log(myLibrary);
+    // renderBooksFromLibrary();
+// }
 
 addNewCard();
 addEventListeners();
