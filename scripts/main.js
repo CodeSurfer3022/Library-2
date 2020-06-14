@@ -29,6 +29,12 @@ function ReadStatus() {
 
 function deleteCard() {
     let card = this.parentNode.parentNode.parentNode;
+    let Title = card.querySelector('p[value="Title"]').textContent;
+    // retrieve book with Title
+    let book = retrieveBookFromLibrary(Title);
+    let index = myLibrary.findIndex(book => book.Title === Title);
+    console.log(myLibrary, book, index);
+    myLibrary.splice(index, 1);
     main.removeChild(card);
 }
 
