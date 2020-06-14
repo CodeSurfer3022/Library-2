@@ -13,7 +13,6 @@ function ReadStatus() {
     let card = this.parentNode.parentNode;
     let Title = card.querySelector('p[value="Title"]').textContent;
     let book = retrieveBookFromLibrary(Title)[0];
-    console.log(book);
     let Read = card.querySelector(`p[value="Read"]`);
     let read = Read.textContent;
     if(read.includes('Yes')) {
@@ -23,7 +22,6 @@ function ReadStatus() {
     }
     book.Read = read;
     Read.textContent = `Read: ${read}`;
-    console.log(myLibrary);
     updateLibrary();
 }
 
@@ -33,7 +31,6 @@ function deleteCard() {
     // retrieve book with Title
     let book = retrieveBookFromLibrary(Title);
     let index = myLibrary.findIndex(book => book.Title === Title);
-    console.log(myLibrary, book, index);
     myLibrary.splice(index, 1);
     updateLibrary();
     main.removeChild(card);
@@ -82,7 +79,6 @@ function renderDetails(details, book) {
 }
 
 function addNewCard() {
-    console.log('in new card');
     let plus = document.querySelector('button[value="+"]');
     if(plus) return;
     const card = document.createElement('div');
@@ -91,7 +87,6 @@ function addNewCard() {
     addButton.value = '+';
     addButton.textContent = '+';
     card.appendChild(addButton);
-    console.log(card);
     main.appendChild(card);
     addEventListeners();
 }
@@ -136,7 +131,6 @@ function editBookInLibrary(card, book) {
     book.Author = details.Author;
     book.Pages = details.Pages;
     book.Read = details.Read;
-    console.log(book, details);
     updateLibrary();
 
     updateCard(card, book);
@@ -154,7 +148,7 @@ function addBookToLibrary() {
     addNewCard();
 }
 
-function  addRadioInputSection(book, property) {
+function addRadioInputSection(book, property) {
     let read = book[property];
 
     // Create a section for the property
@@ -240,7 +234,6 @@ function addForm(card, book) {
     form.appendChild(save);
 
     if(!retrieveBookFromLibrary(book.Title).length) {
-        console.log(book);
         save.addEventListener('click', addBookToLibrary);
     } else {
         save.addEventListener('click', function () {
@@ -275,12 +268,20 @@ function updateLibrary() {
     localStorage.setItem('library', JSON.stringify(myLibrary));
 }
 
-// function renderBooksFromLibrary(){
-//     for(let book of myLibrary) {
-//         console.log(book);
-//         addBookToLibrary(book);
-//     }
-// }
+function addBookCard(book) {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    const dummy = document.createElement('div');
+    card.appendChild(dummy);
+    updateCard(card, book);
+    main.appendChild(card);
+}
+
+function renderBooksFromLibrary(){
+    for(let book of myLibrary) {
+        addBookCard(book);
+    }
+}
 
 function addEventListeners() {
     const plus = document.querySelector('button[value="+"]');
@@ -292,20 +293,21 @@ const main = document.querySelector('main');
 
 // If there was a reload, localStorage might have some books
 // 1. Check and render them on reload
-// 2. We need to update localStorage whenever myLibrary is updated
+// 2. Update localStorage whenever myLibrary is updated
 
-// if(localStorage.getItem('library')) {
-//     let library = JSON.parse(localStorage.getItem('library'));
-//     for (let book of library) {
-//         let keys = Object.keys(book);
-//         let title = book[keys[0]];
-//         let author = book[keys[1]];
-//         let pages = book[keys[2]];
-//         let read = book[keys[3]];
-//         let newBook = new Book(title, author, pages, read);
-//         myLibrary.push(newBook);
-//     }
-//     console.log(myLibrary);
-//     renderBooksFromLibrary();
-// }
+if(localStorage.getItem('library')) {
+    let library = JSON.parse(localStorage.getItem('library'));
+    for (let book of library) {
+        let keys = Object.keys(book);
+        let title = book[keys[0]];
+        let author = book[keys[1]];
+        let pages = book[keys[2]];
+        let read = book[keys[3]];
+        let newBook = new Book(title, author, pages, read);
+        myLibrary.push(newBook);
+    }
+    renderBooksFromLibrary();
+}
+
+addNewCard();
 addEventListeners();
